@@ -1,21 +1,17 @@
 <?php
-function sms_sending($var){
-    $post = [
-        'email' => $var['username'],
-        'token' => $var['password'],
-        'form' => $var['form'],
-        'to' => $var['to'],
-        'text' => $var['msg'],
-    ];
-    $ch = curl_init('http://api.vols.ir/sms/');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-    $response = curl_exec($ch);
-    curl_close($ch);
-	$json = json_decode($response);
-	if($json->status == 'Ok'){
-        return 'Send - '.$json->sendcode;
-    }else{
-        return $response;
-    }
+function sms_sending($vars){
+	$client = new nusoap_client('http://smspanel.trez.ir/trezsmswebservice.asmx?WSDL', true);
+    $UserMessageId = rand(100,1000);
+	$Class = '1';
+	$parameters = array(
+		'Username' => $vars['username'],
+		'Passwod' => $vars['password'],
+		'SenderNumebr' => $vars['form'],
+		'MessageBody' => $vars['msg'],
+		'ReciptionNumbers' => $vars['to'],
+		'Class' => $Class,
+		'UserMessageId' => $UserMessageId
+	);
+	$result = $client->call('SendOneMessage', $parameters);
+	return 	$result['SendOneMessageResult'];
 }
